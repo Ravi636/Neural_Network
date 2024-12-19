@@ -1,0 +1,141 @@
+import math
+
+def calculate_entropy(dataset):
+    # Calculate the number of instances in the dataset
+    num_instances = len(dataset)
+    
+    label_counts = {}
+    for item in dataset:
+        label = item[-1]
+        if label not in label_counts:
+            label_counts[label] = 0
+        label_counts[label] += 1
+
+    entropy = 0
+    for label, count in label_counts.items():
+        p = count / num_instances
+        entropy -= p * math.log(p, 2)
+
+    return entropy
+
+def information_gain(data, split_attribute, label_attribute):
+    # Calculate the entropy of the dataset
+    data_entropy = calculate_entropy(data)
+
+    # Create subsets based on the given attribute
+    subsets = {}
+    for item in data:
+        attribute_value = item[split_attribute]
+        if attribute_value not in subsets:
+            subsets[attribute_value] = []
+        subsets[attribute_value].append(item)
+
+    # Calculate the weight of each subset
+    weight = [float(len(subset)) / len(data) for subset in subsets.values()]
+
+    # Calculate the entropy of each subset
+    subset_entropy = [calculate_entropy(subset) for subset in subsets.values()]
+
+    # Calculate the sum of the product of each subset entropy and weight
+    weighted_entropy = sum(w * e for w, e in zip(weight, subset_entropy))
+
+    # Return the information gain
+    return data_entropy - weighted_entropy
+
+def split_data(data, attribute):
+    subsets = {}
+    for item in data:
+        attribute_value = item[attribute]
+        if attribute_value not in subsets:
+            subsets[attribute_value] = []
+        subsets[attribute_value].append(item)
+
+    return [subset for attribute_value, subset in subsets.items()]
+
+# Dataset
+dataset = [
+    ["Sunny", "Hot", "High", "Weak", "No"],
+    ["Sunny", "Hot", "High", "Strong", "No"],
+    ["Overcast", "Hot", "High", "Weak", "Yes"],
+    ["Rain", "Mild", "High", "Weak", "Yes"],
+    ["Rain", "Cool", "Normal", "Weak", "Yes"],
+    ["Rain", "Cool", "Normal", "Strong", "No"],
+    ["Sunny", "Mild", "High", "Weak", "No"],
+    ["Sunny", "Cool", "Normal",]
+        if attribute_ "Weak", "Yes"],
+    ["Overcast", "Mild", "High", "Strong", "Yes"],
+    ["Overcast", "Hot", "Normal", "Weak", "Yes"],
+    ["Rain", "Mild", "Normal", "Weak", "Yes"],
+    ["Sunny", "Mild", "Normal", "Strong", "Yes"],
+    ["Overcast", "Mid", "Overcast", "High", "Yes"],
+    ["Rain", "Mild", "High", "Weak", "Yes"],
+    ["Rain", "Mild", "Normal", "Weak", "Yes"],
+    ["Sunny", "Mild", "Normal", "Weak", "No"],
+]
+
+# Information gainvalue not in subsets:
+            subsets[attribute_value] = []
+        subsets[attribute_value].append(item)
+    for each return subsets
+
+# Create the [0, dataset from the context
+dataset = [ 1
+    ["Sun, 2, 3]
+for i in attributes:
+    print(f"ny", "HotInformation gain for attribute {i}: {information_gain(dataset, i, 4)}")
+
+
+The output of the provided code will show the information gain for each feature and rank them accordingly. You can modify the dataset, attributes, and indexes according to the requirements.As for the second part of the project, building a decision tree based on the information gain, I will provide a separate code snippet below.
+
+```python
+def build_tree(data, features, labels, depth=0):
+    if len(data) == 0:
+        return {"": {"": {}}}
+
+    if labels.unique().size == 1:
+        return {"": {"": labels.iloc[0]}}
+
+    best_feature = None
+    max_info_gain = -1
+
+    for feature in features:
+        info_gain = information_gain(data, feature, labels)
+        if info_gain > max_info_gain:
+            max_info_gain = info_gain
+            best_feature = feature
+
+    if max_info_gain == 0:
+        return {"": {"": labels.value_counts().idxmax()}}
+
+    subsets = split_data(data, best_feature)
+    sub_features = features.copy()
+    sub_features.remove(best_feature)
+
+    tree = {"": {}}
+    for value, subset in subsets.items():
+        tree[""][value] = build_tree(subset, sub_features, labels, depth=depth + 1)
+
+    return tree
+
+def predict(tree, row):
+    if row in tree:
+        return tree[row]
+
+    for key, value in tree.items():
+        if isinstance(value, dict):
+            prediction = predict(value, row)
+            if prediction is not None:
+                return prediction
+
+    return None
+
+# Build the decision tree
+tree = build_tree(dataset, features, labels)
+
+# Print the decision tree
+print(tree)
+
+# Predict a new instance
+new_instance = ["Sunny", "Hot", "High"]
+prediction = predict(tree, new_instance)
+print(f"Prediction for new instance {new_instance}: {prediction}")
